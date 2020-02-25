@@ -1,12 +1,11 @@
 {
   "name": "iohook",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "Node.js global keyboard and mouse hook",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "install": "node install.js",
-    "install-all": "node install.js --all",
+    "install": "npm run build",
     "build": "cmake-js compile",
     "deploy": "node build.js",
     "test": "jest",
