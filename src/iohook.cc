@@ -17,6 +17,9 @@ using Callback = Nan::Callback;
 static bool sIsRunning = false;
 static bool sIsDebug = false;
 
+static bool bGrabMouseEvents = false;
+static bool bGrabKeyEvents = false;
+
 static HookProcessWorker* sIOHook = nullptr;
 
 static std::queue<uiohook_event> zqueue;
@@ -38,6 +41,13 @@ static pthread_mutex_t hook_running_mutex;
 static pthread_mutex_t hook_control_mutex;
 static pthread_cond_t hook_control_cond;
 #endif
+
+void sendEvent(uiohook_event * const event){
+  uiohook_event event_copy;
+  memcpy(&event_copy, event, sizeof(uiohook_event));
+  zqueue.push(event_copy);
+  sIOHook->fHookExecution->Send(event, sizeof(uiohook_event));
+}
 
 bool logger_proc(unsigned int level, const char *format, ...) {
   if (!sIsDebug) {
@@ -116,16 +126,19 @@ void dispatch_proc(uiohook_event * const event) {
     case EVENT_KEY_PRESSED:
     case EVENT_KEY_RELEASED:
     case EVENT_KEY_TYPED:
+        if(bGrabKeyEvents) event->reserved = 0x01;
+        sendEvent(event);
+        break;
     case EVENT_MOUSE_PRESSED:
     case EVENT_MOUSE_RELEASED:
     case EVENT_MOUSE_CLICKED:
+      if(bGrabMouseEvents) event->reserved = 0x01;
+      sendEvent(event);
+      break;
     case EVENT_MOUSE_MOVED:
     case EVENT_MOUSE_DRAGGED:
     case EVENT_MOUSE_WHEEL:
-      uiohook_event event_copy;
-      memcpy(&event_copy, event, sizeof(uiohook_event));
-      zqueue.push(event_copy);
-      sIOHook->fHookExecution->Send(event, sizeof(uiohook_event));
+      sendEvent(event);
       break;
   }
 }
@@ -508,7 +521,14 @@ void HookProcessWorker::Stop()
 NAN_METHOD(GrabMouseClick) {
   if (info.Length() > 0)
   {
-    grab_mouse_click(info[0]->IsTrue());
+    bGrabMouseEvents = info[0]->IsTrue();
+  }
+}
+
+NAN_METHOD(GrabKeyPress) {
+  if (info.Length() > 0)
+  {
+    bGrabKeyEvents = info[0]->IsTrue();
   }
 }
 
@@ -563,6 +583,9 @@ NAN_MODULE_INIT(Init) {
 
   Nan::Set(target, Nan::New<String>("grabMouseClick").ToLocalChecked(),
   Nan::GetFunction(Nan::New<FunctionTemplate>(GrabMouseClick)).ToLocalChecked());
+
+  Nan::Set(target, Nan::New<String>("grabKeyPress").ToLocalChecked(),
+  Nan::GetFunction(Nan::New<FunctionTemplate>(GrabKeyPress)).ToLocalChecked());
 }
 
 NODE_MODULE(nodeHook, Init)
