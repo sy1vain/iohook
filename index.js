@@ -1,13 +1,7 @@
 const EventEmitter = require('events');
 const path = require('path');
 
-const runtime = process.versions['electron'] ? 'electron' : 'node';
-const essential = runtime + '-v' + process.versions.modules + '-' + process.platform + '-' + process.arch;
-const modulePath = path.join(__dirname, 'builds', essential, 'build', 'Release', 'iohook.node');
-if (process.env.DEBUG) {
-  console.info('Loading native binary:', modulePath);
-}
-let NodeHookAddon = require(modulePath);
+let NodeHookAddon = require('bindings')('iohook.node');
 
 const events = {
   3: 'keypress',
