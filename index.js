@@ -1,7 +1,11 @@
 const EventEmitter = require('events');
 const path = require('path');
 
-let NodeHookAddon = require('bindings')({bindings:'iohook.node', try: [['module_root', 'bin', 'arch', 'Release','bindings']]});
+let NodeHookAddon = require('bindings')({bindings:'iohook.node', try: [
+  ['module_root', 'bin', 'arch', 'bindings'],
+  ['module_root', 'bin', 'arch', 'Debug','bindings'],
+  ['module_root', 'bin', 'arch', 'Release','bindings']
+]});
 
 const events = {
   3: 'keypress',
