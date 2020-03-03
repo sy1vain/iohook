@@ -47,3 +47,5 @@ libuiohook/**/*.pc
 libuiohook/config.status
 libuiohook/include/config.h
 libuiohook/include/stamp-h1
+
+bin
