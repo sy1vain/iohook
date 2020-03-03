@@ -3,7 +3,9 @@ const readPkgUp = require('read-pkg-up')
 
 async function build(){
 	try{
-		let {packageJson: {iohook}} = await readPkgUp({cwd:path.resolve(__dirname, '..')})
+		let pkg = await readPkgUp({cwd:path.resolve(__dirname, '..')})
+		pkg = pkg.packageJson || pkg.pkg
+		let iohook = pkg.iohook
 		if(!Array.isArray(iohook)) iohook = [iohook]
 		buildAll(iohook)
 	}catch(e){
